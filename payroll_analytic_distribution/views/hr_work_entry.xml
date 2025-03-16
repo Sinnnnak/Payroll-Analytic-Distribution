@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="hr_work_entry_view_form_inherit" model="ir.ui.view">
+            <field name="name">hr.work.entry.view.form.inherit</field>
+            <field name="model">hr.work.entry</field>
+            <field name="inherit_id" ref="hr_work_entry.hr_work_entry_view_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='work_entry_type_id']" position="after">
+                    <field name="analytic_distribution" widget="analytic_distribution" groups="analytic.group_analytic_accounting" options="{'product_field': 'product_id'}"/>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>
