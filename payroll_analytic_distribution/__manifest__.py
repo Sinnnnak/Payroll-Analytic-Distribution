@@ -13,6 +13,7 @@
     'depends': ['hr_payroll', 'hr_work_entry', 'analytic','hr_payroll_account'],
     'data': [
         'views/hr_work_entry.xml',
+        'views/salary_rule.xml',
         'views/salary_structure.xml',
     ],
 }

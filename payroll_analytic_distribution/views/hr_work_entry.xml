@@ -9,6 +9,9 @@
                 <xpath expr="//field[@name='work_entry_type_id']" position="after">
                     <field name="analytic_distribution" widget="analytic_distribution" groups="analytic.group_analytic_accounting" options="{'product_field': 'product_id'}"/>
                 </xpath>
+                <xpath expr="//field[@name='duration']" position="after">
+                    <field name="total_employee_hours" widget="float_time"/>
+                </xpath>
             </field>
         </record>
     </data>

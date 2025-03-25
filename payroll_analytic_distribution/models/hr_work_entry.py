@@ -12,6 +12,18 @@ class HrWorkEntry(models.Model):
     analytic_distribution_text = fields.Text(company_dependent=True)
     analytic_distribution = fields.Json(inverse="_inverse_analytic_distribution", store=False, precompute=False)
     analytic_account_ids = fields.Many2many('account.analytic.account', compute="_compute_analytic_account_ids", copy=True)
+    total_employee_hours = fields.Float(
+        string='Total Employee Hours', 
+        compute='_compute_total_employee_hours', 
+        store=True,
+        readonly=True,
+        help="Total hours calculated by multiplying hours per day with duration")
+
+
+    @api.depends('duration')
+    def _compute_total_employee_hours(self):
+        for record in self:
+            record.total_employee_hours = record.duration * record.employee_id.resource_calendar_id.hours_per_day
 
     @api.depends_context('company')
     @api.depends('analytic_distribution_text')

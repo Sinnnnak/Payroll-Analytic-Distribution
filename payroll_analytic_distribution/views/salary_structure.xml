@@ -1,13 +1,16 @@
 <?xml version='1.0' encoding='utf-8'?>
 <odoo>
     <data>
-        <record id="hr_payroll_structure_form_view_inherit" model="ir.ui.view">
+        <record id="hr_payroll_structure_form_inherit" model="ir.ui.view">
             <field name="name">hr.payroll.structure.form.inherit</field>
             <field name="model">hr.payroll.structure</field>
             <field name="inherit_id" ref="hr_payroll.view_hr_employee_grade_form"/>
             <field name="arch" type="xml">
                 <xpath expr="//field[@name='type_id']" position="after">
                     <field name="is_use_work_entry_based_computation"/>
+                </xpath>
+                <xpath expr="//field[@name='partner_id']" position="after">
+                    <field name="is_work_entry_calc" widget="boolean_toggle" string="Work Entry Calculation"/>
                 </xpath>
             </field>
         </record>
