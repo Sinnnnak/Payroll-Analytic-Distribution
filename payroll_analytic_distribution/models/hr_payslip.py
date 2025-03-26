@@ -55,36 +55,43 @@ class HrPayslip(models.Model):
                         hourly_rate = contract.wage / working_hours_per_month if working_hours_per_month else 0.0
                         basic_salary = total_hours * hourly_rate
                         project_hours_ratio = total_hours / total_worked_hours
-
+                        
                         for net in slip.line_ids:
-                            if net.salary_rule_id.is_work_entry_calc == True:
-                                rule_amount = net.total
-                                work_entry_amount = rule_amount * project_hours_ratio
-
-                                net_debit_line = {
-                                        'name': f'{net.name} FOR: {line.name}',
-                                        'partner_id': slip.employee_id.work_contact_id.id,
-                                        'account_id': net.salary_rule_id.account_debit.id,
-                                        'journal_id': slip.struct_id.journal_id.id,
-                                        'date': slip.date,
-                                        'debit': work_entry_amount if work_entry_amount > 0 else 0.0,
-                                        'credit': -work_entry_amount if work_entry_amount < 0 else 0.0,
-                                        'analytic_distribution': line.analytic_distribution,
-                                    }
-                                new_lines.append(net_debit_line)
-
-                                net_credit_line = {
-                                    'name': f'{net.name} FOR: {line.name}',
-                                    'partner_id': slip.employee_id.work_contact_id.id,
-                                    'account_id': net.salary_rule_id.account_credit.id,
-                                    'journal_id': slip.struct_id.journal_id.id,
-                                    'date': slip.date,
-                                    'debit': -work_entry_amount if work_entry_amount < 0 else 0.0,
-                                    'credit': work_entry_amount if work_entry_amount > 0 else 0.0,
-                                    'analytic_distribution': line.analytic_distribution,
-                                }
-                                new_lines.append(net_credit_line)
-
+                            rule_amount = net.total
+                            if rule_amount > 0:
+                                if net.salary_rule_id.is_work_entry_calc == True:
+                                    work_entry_amount = rule_amount * project_hours_ratio
+                                    
+                                    # Always ensure account_id and date are properly set
+                                    account_credit = net.salary_rule_id.account_credit
+                                    account_debit = net.salary_rule_id.account_debit
+                                    
+                                    if account_credit:
+                                        net_credit_line = {
+                                            'name': f'{net.name} FOR: {line.name}',
+                                            'partner_id': slip.employee_id.work_contact_id.id,
+                                            'account_id': account_credit.id,
+                                            'journal_id': slip.struct_id.journal_id.id,
+                                            'date': slip.date or fields.Date.today(),
+                                            'debit': 0.0,
+                                            'credit': abs(work_entry_amount),
+                                            'analytic_distribution': line.analytic_distribution,
+                                        }
+                                        new_lines.append(net_credit_line)
+                                    
+                                    if account_debit:
+                                        net_debit_line = {
+                                            'name': f'{net.name} FOR: {line.name}',
+                                            'partner_id': slip.employee_id.work_contact_id.id,
+                                            'account_id': account_debit.id,
+                                            'journal_id': slip.struct_id.journal_id.id,
+                                            'date': slip.date or fields.Date.today(),
+                                            'debit': abs(work_entry_amount),
+                                            'credit': 0.0,
+                                            'analytic_distribution': line.analytic_distribution,
+                                        }
+                                        new_lines.append(net_debit_line)
+                                
                 move_dict['line_ids'] = [(0, 0, line_vals) for line_vals in new_lines]  
                 move = self._create_account_move(move_dict)
                 slip.write({'move_id': move.id})
